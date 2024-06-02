@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Reflection.Emit;
 using System.Windows.Forms;
 
 namespace ggame
@@ -9,8 +9,13 @@ namespace ggame
     {
         private const int GridSize = 8;
         private const int CellSize = 80;
-        private int[,] board = new int[GridSize, GridSize]; // 0: empty, 1: black, 2: white
+        private int[,] board = new int[GridSize, GridSize]; // 0: 空，1: 黑棋，2: 白棋
         private bool isBlackTurn = true;
+        private bool isSinglePlayer = true; // 标识是否是单人模式
+        private enum Difficulty { Easy, Normal, Hard }
+        private Difficulty currentDifficulty = Difficulty.Easy; // 当前难度
+        private Point? lastMove = null;
+
 
         public Form1()
         {
@@ -19,8 +24,11 @@ namespace ggame
             this.panel1.Paint += new PaintEventHandler(Panel1_Paint);
             this.panel1.MouseClick += new MouseEventHandler(Panel1_MouseClick);
             UpdateStatus();
+            // 設置窗體的邊框樣式為固定
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
         }
 
+        // 初始化棋盘
         private void InitializeBoard()
         {
             board[3, 3] = 2;
@@ -29,11 +37,12 @@ namespace ggame
             board[4, 3] = 1;
         }
 
+        // 绘制棋盘和棋子
         private void Panel1_Paint(object sender, PaintEventArgs e)
         {
             DrawBoard(e.Graphics);
 
-            // Draw valid move indicators
+            // 绘制有效移动指示器
             List<Point> validMoves = GetValidMoves(isBlackTurn ? 1 : 2);
             foreach (Point move in validMoves)
             {
@@ -43,20 +52,40 @@ namespace ggame
 
                 e.Graphics.FillEllipse(Brushes.Green, centerX - radius, centerY - radius, radius * 2, radius * 2);
             }
+            // 绘制最新一步的红点
+            if (lastMove.HasValue)
+            {
+                int lastMoveX = lastMove.Value.X * CellSize + CellSize / 2;
+                int lastMoveY = lastMove.Value.Y * CellSize + CellSize / 2;
+                int redDotRadius = CellSize / 8;
+
+                e.Graphics.FillEllipse(Brushes.Red, lastMoveX - redDotRadius, lastMoveY - redDotRadius, redDotRadius * 2, redDotRadius * 2);
+            }
         }
 
+        // 绘制棋盘和棋子
         private void DrawBoard(Graphics g)
         {
             Pen pen = new Pen(Color.Black);
+            Brush backgroundBrush = new SolidBrush(Color.LightGreen);
 
-            // Draw grid lines
+            // Draw grid background
+            for (int y = 0; y < GridSize; y++)
+            {
+                for (int x = 0; x < GridSize; x++)
+                {
+                    g.FillRectangle(backgroundBrush, x * CellSize, y * CellSize, CellSize, CellSize);
+                }
+            }
+
+            // 绘制网格线
             for (int i = 0; i <= GridSize; i++)
             {
                 g.DrawLine(pen, i * CellSize, 0, i * CellSize, GridSize * CellSize);
                 g.DrawLine(pen, 0, i * CellSize, GridSize * CellSize, i * CellSize);
             }
 
-            // Draw pieces
+            // 绘制棋子
             for (int y = 0; y < GridSize; y++)
             {
                 for (int x = 0; x < GridSize; x++)
@@ -73,6 +102,7 @@ namespace ggame
             }
         }
 
+        // 处理鼠标点击事件
         private void Panel1_MouseClick(object sender, MouseEventArgs e)
         {
             int x = e.X / CellSize;
@@ -83,26 +113,76 @@ namespace ggame
                 int currentPlayer = isBlackTurn ? 1 : 2;
                 if (IsValidMove(x, y, currentPlayer))
                 {
-                    board[y, x] = currentPlayer;
-                    FlipPieces(x, y, currentPlayer);
-                    isBlackTurn = !isBlackTurn;
+                    MakeMove(x, y, currentPlayer);
                     this.panel1.Invalidate();
                     UpdateStatus();
 
                     if (!HasValidMove(1) && !HasValidMove(2))
                     {
-                        MessageBox.Show("Game Over!\n" + GetScores());
+                        DialogResult result = MessageBox.Show(GetScores() + "游戲結束！\n 是否重新開始？", "確認", MessageBoxButtons.YesNo);
+                        if (result == DialogResult.Yes)
+                        {
+                            ResetBoard();
+                        }
                     }
-                    else if (!HasValidMove(isBlackTurn ? 1 : 2))
+                    if (!HasValidMove(2))
                     {
-                        isBlackTurn = !isBlackTurn;
+                        isBlackTurn = false;
                         UpdateStatus();
-                        MessageBox.Show("No valid moves, turn skipped!");
+                        MessageBox.Show("没有有效的移动，回合跳过！");
+                    }
+                    else if (isSinglePlayer && !isBlackTurn)
+                    {
+                        // 电脑回合
+                        ComputerMove();
                     }
                 }
             }
         }
 
+        // 电脑回合逻辑
+        private void ComputerMove()
+        {
+            List<Point> validMoves = GetValidMoves(2);
+            if (validMoves.Count > 0)
+            {
+                Random rand = new Random();
+                Point move = validMoves[rand.Next(validMoves.Count)];
+                MakeMove(move.X, move.Y, 2);
+                this.panel1.Invalidate();
+                UpdateStatus();
+
+                if (!HasValidMove(1) && !HasValidMove(2))
+                {
+                    DialogResult result = MessageBox.Show(GetScores() + "游戲結束 ！是否重新開始？", "", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        ResetBoard();
+                    }
+                }
+            }
+            else if (!HasValidMove(1))
+            {
+                MessageBox.Show("没有有效的移动，游戏结束！");
+            }
+            else
+            {
+                isBlackTurn = true;
+                UpdateStatus();
+                MessageBox.Show("没有有效的移动，回合跳过！");
+            }
+        }
+
+        // 执行落子操作
+        private void MakeMove(int x, int y, int player)
+        {
+            board[y, x] = player;
+            FlipPieces(x, y, player);
+            isBlackTurn = !isBlackTurn;
+            lastMove = new Point(x, y); // 保存最新一步的位置
+        }
+
+        // 检查移动是否合法
         private bool IsValidMove(int x, int y, int player)
         {
             bool valid = false;
@@ -134,6 +214,7 @@ namespace ggame
             return valid;
         }
 
+        // 翻转对手的棋子
         private void FlipPieces(int x, int y, int player)
         {
             int opponent = player == 1 ? 2 : 1;
@@ -170,6 +251,7 @@ namespace ggame
             }
         }
 
+        // 检查是否有合法移动
         private bool HasValidMove(int player)
         {
             for (int y = 0; y < GridSize; y++)
@@ -185,6 +267,7 @@ namespace ggame
             return false;
         }
 
+        // 获取分数
         private string GetScores()
         {
             int blackCount = 0;
@@ -205,15 +288,17 @@ namespace ggame
                 }
             }
 
-            return $"Black: {blackCount}, White: {whiteCount}";
+            return $"黑棋: {blackCount}, 白棋: {whiteCount}";
         }
 
+        // 更新状态显示
         private void UpdateStatus()
         {
-            string currentPlayer = isBlackTurn ? "Black" : "White";
-            label1.Text = $"Turn: {currentPlayer}\n{GetScores()}";
+            string currentPlayer = isBlackTurn ? "黑棋" : "白棋";
+            label1.Text = $"回合: {currentPlayer}\n{GetScores()}";
         }
 
+        // 获取有效移动位置列表
         private List<Point> GetValidMoves(int player)
         {
             List<Point> validMoves = new List<Point>();
@@ -230,6 +315,29 @@ namespace ggame
             }
 
             return validMoves;
+        }
+
+        public void setModeToPVP()//玩家對戰模式
+        {
+            isSinglePlayer = false;
+        }
+        public void setModeToPVE()//人機對戰模式
+        {
+            isSinglePlayer = true;
+        }
+
+        private void Back_Click(object sender, EventArgs e)//返回按鈕
+        {
+            this.Close();
+        }
+
+        private void ResetBoard()//重設棋盤
+        {
+            board = new int[GridSize, GridSize];
+            InitializeBoard();
+            isBlackTurn = true;
+            UpdateStatus();
+            this.panel1.Invalidate(); // 重新绘制棋盘
         }
     }
 }

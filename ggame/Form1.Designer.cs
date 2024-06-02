@@ -17,37 +17,59 @@
 
         private void InitializeComponent()
         {
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.SuspendLayout();
+            panel1 = new Panel();
+            label1 = new Label();
+            Back = new Button();
+            SuspendLayout();
             // 
             // panel1
             // 
-            this.panel1.Location = new System.Drawing.Point(12, 12);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(640, 640);
-            this.panel1.TabIndex = 0;
+            panel1.Location = new Point(12, 81);
+            panel1.Margin = new Padding(3, 4, 3, 4);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(653, 757);
+            panel1.TabIndex = 0;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 655);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(46, 17);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "label1";
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 13.8F, FontStyle.Regular, GraphicsUnit.Point);
+            label1.Location = new Point(711, 81);
+            label1.Name = "label1";
+            label1.Size = new Size(76, 31);
+            label1.TabIndex = 1;
+            label1.Text = "label1";
+            // 
+            // Back
+            // 
+            Back.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
+            Back.Location = new Point(12, 12);
+            Back.Name = "Back";
+            Back.Size = new Size(116, 49);
+            Back.TabIndex = 2;
+            Back.Text = "Back";
+            Back.UseVisualStyleBackColor = true;
+            Back.Click += Back_Click;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(664, 681);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.panel1);
-            this.Name = "Form1";
-            this.Text = "Reversi";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            AutoSize = true;
+            ClientSize = new Size(912, 851);
+            ControlBox = false;
+            Controls.Add(Back);
+            Controls.Add(label1);
+            Controls.Add(panel1);
+            Margin = new Padding(3, 4, 3, 4);
+            MaximizeBox = false;
+            Name = "Form1";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Reversi";
+            ResumeLayout(false);
+            PerformLayout();
         }
+
+        private Button Back;
     }
 }
