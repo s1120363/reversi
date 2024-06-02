@@ -7,6 +7,7 @@ namespace ggame
 {
     public partial class Form1 : Form
     {
+        //hello
         private const int GridSize = 8;
         private const int CellSize = 80;
         private int[,] board = new int[GridSize, GridSize]; // 0: 空，1: 黑棋，2: 白棋
