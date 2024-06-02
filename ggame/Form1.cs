@@ -117,24 +117,33 @@ namespace ggame
                     this.panel1.Invalidate();
                     UpdateStatus();
 
-                    if (!HasValidMove(1) && !HasValidMove(2))
+                    // 檢查下一玩家是否有合法移動
+                    if (!HasValidMove(isBlackTurn ? 1 : 2))
                     {
-                        DialogResult result = MessageBox.Show(GetScores() + "游戲結束！\n 是否重新開始？", "確認", MessageBoxButtons.YesNo);
-                        if (result == DialogResult.Yes)
+                        isBlackTurn = !isBlackTurn; // 跳過回合
+                        UpdateStatus();
+
+                        if (!HasValidMove(isBlackTurn ? 1 : 2))
                         {
-                            ResetBoard();
+                            // 如果兩個玩家都沒有合法移動，遊戲結束
+                            EndGame();
+                        }
+                        else
+                        {
+                            MessageBox.Show("没有有效的移动，回合跳过！");
+                            if (isSinglePlayer && !isBlackTurn)
+                            {
+                                ComputerMove();
+                            }
                         }
                     }
-                    if (!HasValidMove(2))
+                    else
                     {
-                        isBlackTurn = false;
-                        UpdateStatus();
-                        MessageBox.Show("没有有效的移动，回合跳过！");
-                    }
-                    else if (isSinglePlayer && !isBlackTurn)
-                    {
-                        // 电脑回合
-                        ComputerMove();
+                        // 如果是单人模式且轮到电脑
+                        if (isSinglePlayer && !isBlackTurn)
+                        {
+                            ComputerMove();
+                        }
                     }
                 }
             }
@@ -152,18 +161,28 @@ namespace ggame
                 this.panel1.Invalidate();
                 UpdateStatus();
 
-                if (!HasValidMove(1) && !HasValidMove(2))
+                // 檢查玩家是否有合法移動
+                if (!HasValidMove(1))
                 {
-                    DialogResult result = MessageBox.Show(GetScores() + "游戲結束 ！是否重新開始？", "", MessageBoxButtons.YesNo);
-                    if (result == DialogResult.Yes)
+                    // 玩家沒有合法移動，跳過回合
+                    MessageBox.Show("没有有效的移动，回合跳过！");
+
+                    // 檢查電腦是否還有合法移動
+                    if (HasValidMove(2))
                     {
-                        ResetBoard();
+                        ComputerMove(); // 继续电脑回合
+                    }
+                    else
+                    {
+                        // 如果電腦也沒有合法移動，遊戲結束
+                        EndGame();
                     }
                 }
             }
             else if (!HasValidMove(1))
             {
-                MessageBox.Show("没有有效的移动，游戏结束！");
+                // 直接結束遊戲
+                EndGame();
             }
             else
             {
@@ -173,6 +192,14 @@ namespace ggame
             }
         }
 
+        private void EndGame()
+        {
+            DialogResult result = MessageBox.Show(GetScores() + "\n遊戲結束！是否重新開始？", "確認", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes)
+            {
+                ResetBoard();
+            }
+        }
         // 执行落子操作
         private void MakeMove(int x, int y, int player)
         {
@@ -294,8 +321,17 @@ namespace ggame
         // 更新状态显示
         private void UpdateStatus()
         {
-            string currentPlayer = isBlackTurn ? "黑棋" : "白棋";
-            label1.Text = $"回合: {currentPlayer}\n{GetScores()}";
+            string currentPlayer = isBlackTurn ? "Black" : "White";
+            label1.Text = $"Turn: {currentPlayer}\n{GetScores()}";
+
+            if (isBlackTurn)
+            {
+                pictureBox1.Image = Properties.Resources.black_turn_image; // 替換為黑色玩家回合的圖片
+            }
+            else
+            {
+                pictureBox1.Image = Properties.Resources.white_turn_image; // 替換為白色玩家回合的圖片
+            }
         }
 
         // 获取有效移动位置列表
@@ -337,7 +373,13 @@ namespace ggame
             InitializeBoard();
             isBlackTurn = true;
             UpdateStatus();
+            lastMove = null;
             this.panel1.Invalidate(); // 重新绘制棋盘
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ResetBoard();
         }
     }
 }
