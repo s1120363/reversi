@@ -16,8 +16,15 @@ namespace ggame
         public UI()
         {
             InitializeComponent();
+            SetBackgroundImage();
         }
 
+        private void SetBackgroundImage()
+        {
+            // 确保你的项目资源中有一张名为 background.jpg 的图片
+            this.BackgroundImage = Properties.Resources.background;
+            this.BackgroundImageLayout = ImageLayout.Stretch; // 或者使用其他布局方式，例如 Tile, Center, Zoom
+        }
         private void button1_Click(object sender, EventArgs e)
         {
 

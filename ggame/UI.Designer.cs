@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UI));
             button1 = new Button();
             button2 = new Button();
             button3 = new Button();
@@ -35,10 +36,12 @@
             // 
             // button1
             // 
+            button1.FlatAppearance.BorderSize = 3;
+            button1.FlatStyle = FlatStyle.Flat;
             button1.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point);
-            button1.Location = new Point(281, 129);
+            button1.Location = new Point(316, 121);
             button1.Name = "button1";
-            button1.Size = new Size(184, 81);
+            button1.Size = new Size(207, 77);
             button1.TabIndex = 0;
             button1.Text = "玩家對玩家";
             button1.UseVisualStyleBackColor = true;
@@ -47,9 +50,9 @@
             // button2
             // 
             button2.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point);
-            button2.Location = new Point(281, 229);
+            button2.Location = new Point(316, 218);
             button2.Name = "button2";
-            button2.Size = new Size(184, 78);
+            button2.Size = new Size(207, 74);
             button2.TabIndex = 1;
             button2.Text = "玩家對電腦";
             button2.UseVisualStyleBackColor = true;
@@ -58,9 +61,9 @@
             // button3
             // 
             button3.Font = new Font("Segoe UI", 16.2F, FontStyle.Regular, GraphicsUnit.Point);
-            button3.Location = new Point(281, 326);
+            button3.Location = new Point(316, 310);
             button3.Name = "button3";
-            button3.Size = new Size(184, 78);
+            button3.Size = new Size(207, 74);
             button3.TabIndex = 2;
             button3.Text = "退出";
             button3.UseVisualStyleBackColor = true;
@@ -68,9 +71,11 @@
             // 
             // UI
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(9F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(769, 564);
+            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
+            BackgroundImageLayout = ImageLayout.Stretch;
+            ClientSize = new Size(865, 536);
             Controls.Add(button3);
             Controls.Add(button2);
             Controls.Add(button1);
